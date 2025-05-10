@@ -7,12 +7,14 @@ You can easily install this FocusFlow Pomodoro Timer on your Android device with
 ### Method 1: Direct Install from Website
 
 1. **Open Chrome** on your Android device
-2. **Visit**: [https://YOURUSERNAME.github.io/focusflow-app/](https://YOURUSERNAME.github.io/focusflow-app/) (replace YOURUSERNAME with your GitHub username)
+2. **Visit**: [https://Neeraj-Parekh.github.io/focusflow-app/](https://Neeraj-Parekh.github.io/focusflow-app/)
 3. **Tap the menu button** (three dots in the top right)
-4. Select **Add to Home Screen**
-5. Give the app a name (or keep the default "FocusFlow Pomodoro")
+4. Select **Install app** or **Add to Home Screen**
+5. Give the app a name (or keep the default "FocusFlow")
 6. Tap **Add**
 7. The app will now appear on your home screen like a native app!
+
+> **Note:** Modern browsers may directly show an installation banner at the bottom of the screen. If you see this, you can simply tap "Install" instead of following steps 3-6.
 
 ### Method 2: Install from File (For Testing)
 

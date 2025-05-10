@@ -21,8 +21,16 @@ let currentTimerMode = 'pomodoro';
 let cycles = 0;
 let ambientAudio = null;
 
-// Audio files
-const timerEndAudio = new Audio('sounds/timer-end.mp3');
+// Audio files with error handling for mobile devices
+let timerEndAudio;
+try {
+    timerEndAudio = new Audio('sounds/timer-end.mp3');
+    // Preload the sound to prevent delay on mobile
+    timerEndAudio.load();
+} catch (e) {
+    console.error("Error loading timer end sound:", e);
+}
+
 const ambientSounds = {
     'rain': 'sounds/rain.mp3',
     'cafe': 'sounds/cafe.mp3',
@@ -96,6 +104,9 @@ function startTimer() {
     if (soundEnabled.checked && ambientSound.value !== 'none') {
         playAmbientSound(ambientSound.value);
     }
+    
+    // Request wake lock to keep screen on during active sessions
+    requestWakeLock();
     
     timerInterval = setInterval(() => {
         timeLeft--;
@@ -178,12 +189,33 @@ function resetTimer() {
     }
 }
 
-// Play timer end sound
+// Play timer end sound with improved mobile compatibility
 function playTimerEndSound() {
-    timerEndAudio.play();
+    if (!timerEndAudio) return;
+    
+    try {
+        // Reset the sound to beginning in case it was already played
+        timerEndAudio.currentTime = 0;
+        
+        const playPromise = timerEndAudio.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                // Auto-play was prevented
+                console.info("Timer sound playback requires user interaction on this device");
+                // Visual feedback instead
+                timer.classList.add('timer-ended');
+                setTimeout(() => {
+                    timer.classList.remove('timer-ended');
+                }, 1000);
+            });
+        }
+    } catch (e) {
+        console.error("Error playing timer end sound:", e);
+    }
 }
 
-// Play ambient sound
+// Play ambient sound with improved mobile compatibility
 function playAmbientSound(sound) {
     // Stop any currently playing ambient sound
     if (ambientAudio) {
@@ -192,10 +224,25 @@ function playAmbientSound(sound) {
     }
     
     if (sound !== 'none' && soundEnabled.checked) {
-        ambientAudio = new Audio(ambientSounds[sound]);
-        ambientAudio.loop = true;
-        ambientAudio.volume = 0.5;
-        ambientAudio.play();
+        try {
+            ambientAudio = new Audio(ambientSounds[sound]);
+            ambientAudio.loop = true;
+            ambientAudio.volume = 0.5;
+            
+            // Handle mobile autoplay restrictions
+            const playPromise = ambientAudio.play();
+            
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // Auto-play was prevented
+                    console.info("Audio playback requires user interaction on this device");
+                    // We'll show a visual indicator to let the user know sound is muted
+                    document.body.classList.add('audio-blocked');
+                });
+            }
+        } catch (e) {
+            console.error("Error playing ambient sound:", e);
+        }
     }
 }
 
@@ -287,8 +334,52 @@ ambientSound.addEventListener('change', () => {
     }
 });
 
+// Handle audio context unlock for mobile devices
+function setupMobileAudio() {
+    // Remove the audio-blocked class when user interacts with the page
+    const unlockAudio = () => {
+        document.body.classList.remove('audio-blocked');
+        
+        // Create a temporary audio context to unlock audio on iOS
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const emptySource = audioContext.createBufferSource();
+        emptySource.start();
+        emptySource.stop();
+        
+        // Reload audio elements
+        if (timerEndAudio) {
+            timerEndAudio.load();
+        }
+        
+        // Apply current ambient sound if applicable
+        if (isRunning && soundEnabled.checked && ambientSound.value !== 'none') {
+            playAmbientSound(ambientSound.value);
+        }
+        
+        // Remove event listeners once audio is unlocked
+        document.removeEventListener('touchstart', unlockAudio);
+        document.removeEventListener('click', unlockAudio);
+    };
+    
+    document.addEventListener('touchstart', unlockAudio);
+    document.addEventListener('click', unlockAudio);
+}
+
+// Check if screen wake lock is supported
+async function requestWakeLock() {
+    if ('wakeLock' in navigator) {
+        try {
+            await navigator.wakeLock.request('screen');
+            console.log('Screen wake lock is active');
+        } catch (err) {
+            console.log('Wake lock request failed:', err.message);
+        }
+    }
+}
+
 // Initialize the app
 document.addEventListener('DOMContentLoaded', () => {
     initSettings();
     requestNotificationPermission();
+    setupMobileAudio();
 });

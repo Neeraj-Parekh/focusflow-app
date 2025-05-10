@@ -1,5 +1,5 @@
-const staticCacheName = 'focusflow-static-v1';
-const dynamicCacheName = 'focusflow-dynamic-v1';
+const staticCacheName = 'focusflow-static-v202505110107';
+const dynamicCacheName = 'focusflow-dynamic-v202505110107';
 const assets = [
   './',
   './index.html',
@@ -57,12 +57,35 @@ self.addEventListener('fetch', event => {
           }
           return fetchRes;
         });
+      }).catch(error => {
+        // Network error, serve appropriate fallback based on request type
+        const url = new URL(event.request.url);
+        
+        // Handle audio file fallbacks
+        if (url.pathname.includes('/sounds/')) {
+          console.log('Audio file fetch failed, returning silent audio fallback');
+          // Return a minimal silent audio file for sound requests when offline
+          return new Response(new ArrayBuffer(0), {
+            status: 200,
+            headers: {'Content-Type': 'audio/mp3'}
+          });
+        }
+        
+        // Handle image fallbacks
+        if (url.pathname.includes('/images/')) {
+          console.log('Image fetch failed, returning image fallback');
+          return caches.match('./images/icon-72x72.png');
+        }
+        
+        // Handle HTML fallbacks
+        if (event.request.headers.get('accept').includes('text/html')) {
+          console.log('HTML fetch failed, returning cached index page');
+          return caches.match('./index.html');
+        }
+        
+        // Default - just report the error
+        console.log('Network request failed and no fallback available', error);
       });
-    }).catch(() => {
-      // Fallback for HTML pages if offline
-      if (event.request.url.indexOf('.html') > -1) {
-        return caches.match('./index.html');
-      }
     })
   );
 });
