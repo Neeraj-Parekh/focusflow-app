@@ -1,7 +1,7 @@
 {
     "name": "FocusFlow Pomodoro",
     "short_name": "FocusFlow",
-    "start_url": "https://focusflow-app.io/index.html",
+    "start_url": "index.html",
     "display": "standalone",
     "background_color": "#222831",
     "theme_color": "#e85d75",

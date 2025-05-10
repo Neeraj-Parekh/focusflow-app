@@ -35,10 +35,21 @@ sed -i "s/focusflow-dynamic-v[0-9]*/focusflow-dynamic-v$current_date/" service-w
 
 echo -e "${YELLOW}Updated cache version in service-worker.js${NC}"
 
+# Check for any updates to the app
+echo -e "${YELLOW}Checking for pending changes...${NC}"
+if [[ -z $(git status -s) ]]; then
+    echo -e "${BLUE}No changes detected. Do you still want to update GitHub Pages? (y/n)${NC}"
+    read -r response
+    if [[ ! "$response" =~ ^([yY][eE][sS]|[yY])$ ]]; then
+        echo -e "${YELLOW}Deployment cancelled.${NC}"
+        exit 0
+    fi
+fi
+
 # Commit changes
 echo -e "${YELLOW}Committing changes...${NC}"
 git add .
-git commit -m "Update app with enhancements for Android - $(date)"
+git commit -m "Update FocusFlow PWA for GitHub Pages - $(date)"
 
 # Push to GitHub
 echo -e "${YELLOW}Pushing to GitHub...${NC}"
@@ -47,4 +58,19 @@ git push
 # Success message
 echo -e "${GREEN}✓ Successfully updated FocusFlow WebApp!${NC}"
 echo -e "${BLUE}The updates should be live on GitHub Pages within a few minutes.${NC}"
-echo -e "${YELLOW}Visit: https://$(git config --get remote.origin.url | sed 's/.*github.com[:/]\(.*\)\.git/\1/' | sed 's/\/.*//'|tr '[:upper:]' '[:lower:]').github.io/focusflow-app/${NC}"
+echo -e "${YELLOW}Visit: https://Neeraj-Parekh.github.io/focusflow-app/${NC}"
+
+echo ""
+echo -e "${GREEN}════════════════════════════════════════════${NC}"
+echo -e "${GREEN}      GITHUB PAGES DEPLOYMENT SUCCESS       ${NC}"
+echo -e "${GREEN}════════════════════════════════════════════${NC}"
+echo ""
+echo -e "Your FocusFlow PWA is now deployed to GitHub Pages!"
+echo -e "Users can install it on their Android devices by:"
+echo ""
+echo -e "1. Visiting ${BLUE}https://Neeraj-Parekh.github.io/focusflow-app/${NC}"
+echo -e "2. Tapping the menu button (three dots)"
+echo -e "3. Selecting 'Add to Home Screen' or 'Install app'"
+echo ""
+echo -e "${YELLOW}Remember:${NC} GitHub Pages is free and you don't need a custom domain!"
+echo -e "The PWA will work offline and function just like a native app once installed."

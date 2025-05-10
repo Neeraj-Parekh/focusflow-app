@@ -14,11 +14,11 @@ This is a Progressive Web App version of FocusFlow Pomodoro Timer that can be in
 
 ## Live Version
 
-Access the live version at: [https://focusflow-app.io](https://focusflow-app.io)
+Access the live version at: [https://Neeraj-Parekh.github.io/focusflow-app/](https://Neeraj-Parekh.github.io/focusflow-app/)
 
 ## How to Use
 
-1. Visit [https://focusflow-app.io](https://focusflow-app.io) on your device
+1. Visit [https://Neeraj-Parekh.github.io/focusflow-app/](https://Neeraj-Parekh.github.io/focusflow-app/) on your device
 2. On Android, you'll see a prompt asking if you'd like to install the app
 3. Alternatively, use the browser menu and select "Add to Home Screen"
 4. Once installed, the app will work even when you're offline!
