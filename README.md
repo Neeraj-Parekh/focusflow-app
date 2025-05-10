@@ -1,6 +1,14 @@
 # FocusFlow Pomodoro - Web App (PWA)
 
-This is a Progressive Web App version of FocusFlow Pomodoro Timer that can be installed on Android devices.
+This is a Progressive Web App version of FocusFlow Pomodoro Timer that can be installed on Android devices without going through an app store.
+
+## 📱 Quick Android Installation
+
+Scan this QR code with your Android device:
+
+![Install FocusFlow on Android](images/focusflow_android_qr.png)
+
+Or follow our [Quick Android Installation Guide](ANDROID_QUICK_INSTALL.md)
 
 ## Features
 
@@ -8,9 +16,9 @@ This is a Progressive Web App version of FocusFlow Pomodoro Timer that can be in
 - ☕ Short and long breaks
 - 🔊 Ambient sounds (rain, cafe, forest, fire, white noise)
 - 📊 Cycle tracking
-- 📱 Works offline (PWA capabilities)
+- 📱 Works offline (PWA capabilities) 
 - 📲 Can be installed on Android devices from the browser
-- 🚀 No app store required
+- 🚀 No app store or custom domain required
 
 ## Live Version
 
