@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow Pomodoro</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#e85d75">
+    <link rel="icon" href="images/icon-192x192.png">
+    <link rel="apple-touch-icon" href="images/icon-192x192.png">
+</head>
+<body>
+    <div class="container">
+        <h1>FocusFlow</h1>
+        <div class="timer-container">
+            <div class="timer" id="timer">25:00</div>
+            <div class="controls">
+                <button id="start-btn" class="btn">Start</button>
+                <button id="pause-btn" class="btn" disabled>Pause</button>
+                <button id="reset-btn" class="btn">Reset</button>
+            </div>
+            <div class="timer-type">
+                <button id="pomodoro" class="timer-btn active">Pomodoro</button>
+                <button id="short-break" class="timer-btn">Short Break</button>
+                <button id="long-break" class="timer-btn">Long Break</button>
+            </div>
+        </div>
+
+        <div class="settings">
+            <h2>Settings</h2>
+            <div class="setting-group">
+                <label>Pomodoro: <input type="number" id="pomodoro-time" value="25" min="1" max="60"> minutes</label>
+            </div>
+            <div class="setting-group">
+                <label>Short Break: <input type="number" id="short-break-time" value="5" min="1" max="30"> minutes</label>
+            </div>
+            <div class="setting-group">
+                <label>Long Break: <input type="number" id="long-break-time" value="15" min="1" max="60"> minutes</label>
+            </div>
+            <div class="setting-group">
+                <label>
+                    <input type="checkbox" id="sound-enabled" checked>
+                    Enable Sound
+                </label>
+            </div>
+            <div class="setting-group">
+                <label>Background Sound:</label>
+                <select id="ambient-sound">
+                    <option value="none">None</option>
+                    <option value="rain">Rain</option>
+                    <option value="cafe">Cafe</option>
+                    <option value="forest">Forest</option>
+                    <option value="fire">Fire</option>
+                    <option value="whitenoise">White Noise</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="cycles">
+            <h2>Cycles Completed: <span id="cycle-count">0</span></h2>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Register the service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js')
+                .then(reg => console.log('Service worker registered'))
+                .catch(err => console.log('Service worker not registered', err));
+        }
+    </script>
+</body>
+</html>
