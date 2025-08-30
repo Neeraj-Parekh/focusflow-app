@@ -1,5 +1,5 @@
-const staticCacheName = 'focusflow-static-v202505110130';
-const dynamicCacheName = 'focusflow-dynamic-v202505110130';
+const staticCacheName = 'focusflow-static-v20241130';
+const dynamicCacheName = 'focusflow-dynamic-v20241130';
 const assets = [
   './',
   './index.html',
