@@ -1,11 +1,15 @@
 {
-    "name": "FocusFlow Pomodoro",
+    "name": "FocusFlow - Advanced Productivity Timer",
     "short_name": "FocusFlow",
+    "description": "A comprehensive Pomodoro timer with task management and time tracking. Compete with TickTick and Toggl Track.",
     "start_url": "index.html",
     "display": "standalone",
-    "background_color": "#222831",
+    "background_color": "#1a1a2e",
     "theme_color": "#e85d75",
     "orientation": "portrait-primary",
+    "categories": ["productivity", "utilities", "lifestyle"],
+    "lang": "en",
+    "dir": "ltr",
     "icons": [
         {
             "src": "images/icon-72x72.png",
@@ -47,6 +51,44 @@
             "type": "image/png",
             "sizes": "512x512",
             "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Start Timer",
+            "short_name": "Start",
+            "description": "Start a Pomodoro session",
+            "url": "index.html?action=start",
+            "icons": [
+                {
+                    "src": "images/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Add Task",
+            "short_name": "Task",
+            "description": "Add a new task",
+            "url": "index.html?action=add-task",
+            "icons": [
+                {
+                    "src": "images/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Analytics",
+            "short_name": "Stats",
+            "description": "View productivity analytics",
+            "url": "index.html?action=analytics",
+            "icons": [
+                {
+                    "src": "images/icon-192x192.png",
+                    "sizes": "192x192"
+                }
+            ]
         }
     ]
 }

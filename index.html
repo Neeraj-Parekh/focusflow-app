@@ -12,21 +12,120 @@
 </head>
 <body>
     <div class="container">
-        <h1>FocusFlow</h1>
-        <div class="timer-container">
-            <div class="timer" id="timer">25:00</div>
-            <div class="controls">
-                <button id="start-btn" class="btn">Start</button>
-                <button id="pause-btn" class="btn" disabled>Pause</button>
-                <button id="reset-btn" class="btn">Reset</button>
+        <header class="app-header">
+            <h1>FocusFlow</h1>
+            <div class="header-controls">
+                <button id="theme-toggle" class="icon-btn" title="Toggle Theme">🌙</button>
+                <button id="view-toggle" class="icon-btn" title="Switch View">📊</button>
             </div>
-            <div class="timer-type">
-                <button id="pomodoro" class="timer-btn active">Pomodoro</button>
-                <button id="short-break" class="timer-btn">Short Break</button>
-                <button id="long-break" class="timer-btn">Long Break</button>
+        </header>
+
+        <!-- Main App Tabs -->
+        <nav class="tab-navigation">
+            <button id="timer-tab" class="tab-btn active">Timer</button>
+            <button id="tasks-tab" class="tab-btn">Tasks</button>
+            <button id="tracking-tab" class="tab-btn">Tracking</button>
+            <button id="analytics-tab" class="tab-btn">Analytics</button>
+        </nav>
+
+        <!-- Timer View -->
+        <div id="timer-view" class="view-panel active">
+            <div class="current-task">
+                <label for="current-task-input">Working on:</label>
+                <input type="text" id="current-task-input" placeholder="What are you working on?" />
+                <select id="current-project">
+                    <option value="">No Project</option>
+                    <option value="work">Work</option>
+                    <option value="personal">Personal</option>
+                    <option value="study">Study</option>
+                </select>
+            </div>
+            
+            <div class="timer-container">
+                <div class="timer" id="timer">25:00</div>
+                <div class="controls">
+                    <button id="start-btn" class="btn">Start</button>
+                    <button id="pause-btn" class="btn" disabled>Pause</button>
+                    <button id="reset-btn" class="btn">Reset</button>
+                </div>
+                <div class="timer-type">
+                    <button id="pomodoro" class="timer-btn active">Pomodoro</button>
+                    <button id="short-break" class="timer-btn">Short Break</button>
+                    <button id="long-break" class="timer-btn">Long Break</button>
+                    <button id="custom-timer" class="timer-btn">Custom</button>
+                </div>
             </div>
         </div>
 
+        <!-- Tasks View -->
+        <div id="tasks-view" class="view-panel">
+            <div class="tasks-header">
+                <h2>Tasks</h2>
+                <button id="add-task-btn" class="btn">+ Add Task</button>
+            </div>
+            <div class="task-filters">
+                <select id="project-filter">
+                    <option value="all">All Projects</option>
+                    <option value="work">Work</option>
+                    <option value="personal">Personal</option>
+                    <option value="study">Study</option>
+                </select>
+                <select id="status-filter">
+                    <option value="all">All Tasks</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                </select>
+            </div>
+            <div id="tasks-list" class="tasks-list"></div>
+        </div>
+
+        <!-- Time Tracking View -->
+        <div id="tracking-view" class="view-panel">
+            <div class="tracking-header">
+                <h2>Time Tracking</h2>
+                <div class="manual-timer">
+                    <input type="text" id="manual-task-input" placeholder="Task description" />
+                    <button id="manual-start-btn" class="btn">Start Timer</button>
+                    <span id="manual-timer-display">00:00:00</span>
+                </div>
+            </div>
+            <div id="time-entries" class="time-entries"></div>
+        </div>
+
+        <!-- Analytics View -->
+        <div id="analytics-view" class="view-panel">
+            <div class="analytics-header">
+                <h2>Analytics</h2>
+                <div class="date-range">
+                    <input type="date" id="start-date" />
+                    <span>to</span>
+                    <input type="date" id="end-date" />
+                </div>
+            </div>
+            <div class="analytics-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Total Focus Time</h3>
+                        <span id="total-focus-time">0h 0m</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Completed Cycles</h3>
+                        <span id="total-cycles">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Tasks Completed</h3>
+                        <span id="completed-tasks">0</span>
+                    </div>
+                    <div class="stat-card">
+                        <h3>Average Session</h3>
+                        <span id="avg-session">0m</span>
+                    </div>
+                </div>
+                <div id="productivity-chart"></div>
+            </div>
+        </div>
+
+        <!-- Settings Panel -->
         <div class="settings">
             <h2>Settings</h2>
             <div class="setting-group">
@@ -55,10 +154,85 @@
                     <option value="whitenoise">White Noise</option>
                 </select>
             </div>
+            <div class="setting-group">
+                <label>
+                    <input type="checkbox" id="auto-start-breaks" checked>
+                    Auto-start breaks
+                </label>
+            </div>
+            <div class="setting-group">
+                <label>
+                    <input type="checkbox" id="auto-start-pomodoros">
+                    Auto-start next pomodoro
+                </label>
+            </div>
         </div>
 
+        <!-- Quick Stats -->
         <div id="cycles">
-            <h2>Cycles Completed: <span id="cycle-count">0</span></h2>
+            <h2>Today's Progress</h2>
+            <div class="progress-stats">
+                <div class="stat">
+                    <span class="stat-number" id="cycle-count">0</span>
+                    <span class="stat-label">Cycles</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="focus-time">0h</span>
+                    <span class="stat-label">Focus Time</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number" id="tasks-completed">0</span>
+                    <span class="stat-label">Tasks Done</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modals -->
+        <div id="task-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3 id="modal-title">Add New Task</h3>
+                <form id="task-form">
+                    <input type="hidden" id="task-id" />
+                    <div class="form-group">
+                        <label for="task-title">Task Title:</label>
+                        <input type="text" id="task-title" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="task-description">Description:</label>
+                        <textarea id="task-description"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-project">Project:</label>
+                        <select id="task-project">
+                            <option value="">No Project</option>
+                            <option value="work">Work</option>
+                            <option value="personal">Personal</option>
+                            <option value="study">Study</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-priority">Priority:</label>
+                        <select id="task-priority">
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="task-due-date">Due Date:</label>
+                        <input type="date" id="task-due-date" />
+                    </div>
+                    <div class="form-group">
+                        <label for="estimated-pomodoros">Estimated Pomodoros:</label>
+                        <input type="number" id="estimated-pomodoros" min="1" value="1" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn">Save Task</button>
+                        <button type="button" class="btn secondary" id="cancel-task">Cancel</button>
+                    </div>
+                </form>
+            </div>
         </div>
 
     </div>
