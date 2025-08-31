@@ -10,3 +10,27 @@ Thumbs.db
 # Temporary files
 *.log
 *.tmp
+
+# Backend specific
+__pycache__/
+*.py[cod]
+*$py.class
+backend/venv/
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Security scanning reports
+*security_report.json
+*bandit_report.json
+
+# Node modules
+node_modules/
+
+# Build artifacts
+dist/
+build/
