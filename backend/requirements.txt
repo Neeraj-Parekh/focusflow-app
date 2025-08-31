@@ -41,6 +41,7 @@ kombu==5.3.4
 prometheus-client==0.19.0
 sentry-sdk[fastapi]==1.39.2        # Error tracking with security
 safety==2.3.5                      # Vulnerability scanning
+packaging<22.0                     # Required for safety compatibility
 bandit==1.7.5                      # Security linting
 
 # === DEVELOPMENT & TESTING ===
