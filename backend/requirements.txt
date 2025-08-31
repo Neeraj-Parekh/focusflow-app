@@ -1,29 +1,59 @@
+# === CORE FRAMEWORK ===
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-sqlalchemy==2.0.23
-alembic==1.12.1
+pydantic==2.5.2
+pydantic-settings==2.1.0
+
+# === CRITICAL SECURITY UPDATES (PATCHED VULNERABILITIES) ===
+python-jose[cryptography]==3.4.0    # CRITICAL: CVE-2024-33663, CVE-2024-33664 FIXED
+python-multipart==0.0.18           # HIGH: CVE-2024-24762, CVE-2024-53981 FIXED
+aiohttp==3.10.11                    # HIGH: CVE-2024-30251, CVE-2024-23829, CVE-2024-27306, CVE-2024-52304 FIXED
+scikit-learn==1.5.0                # MEDIUM: CVE-2024-5206 FIXED
+
+# === ENHANCED SECURITY STACK ===
+cryptography==42.0.8               # Latest encryption algorithms
+bcrypt==4.2.0                      # Enhanced password hashing
+pyjwt==2.8.0                       # Secure JWT with latest fixes
+passlib[bcrypt]==1.7.4
+python-dotenv==1.0.1
+structlog==23.2.0
+
+# === DATABASE & CACHING ===
+sqlalchemy==2.0.25                 # Latest security patches
+alembic==1.13.1
 psycopg2-binary==2.9.9
 redis==5.0.1
-celery==5.3.4
-pydantic==2.5.0
-pydantic-settings==2.1.0
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-python-multipart==0.0.6
-email-validator==2.1.0
-pytest==7.4.3
-pytest-asyncio==0.21.1
-httpx==0.25.2
-python-dotenv==1.0.0
-structlog==23.2.0
-openai==1.3.5
-scikit-learn==1.3.2
+aioredis==2.0.1
+
+# === AI/ML SECURE STACK ===
+openai==1.6.1                      # Latest API with security fixes
+tensorflow==2.15.0                 # Secure ML framework
+torch==2.1.2                       # PyTorch with security patches
+transformers==4.36.2               # Hugging Face with fixes
 pandas==2.1.3
 numpy==1.25.2
-tensorflow==2.15.0
+
+# === BACKGROUND PROCESSING ===
+celery==5.3.4
+kombu==5.3.4
+
+# === MONITORING & SECURITY ===
+prometheus-client==0.19.0
+sentry-sdk[fastapi]==1.39.2        # Error tracking with security
+safety==2.3.5                      # Vulnerability scanning
+bandit==1.7.5                      # Security linting
+
+# === DEVELOPMENT & TESTING ===
+pytest==7.4.4
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+httpx==0.25.2
+faker==21.0.0
+
+# === ADDITIONAL SECURITY TOOLS ===
+pyotp==2.9.0                       # TOTP for MFA
+qrcode==7.4.2                      # QR code generation for MFA
+email-validator==2.1.0.post1
+phonenumbers==8.13.27              # Phone validation
 websockets==12.0
-aioredis==2.0.1
 motor==3.3.2
-bcrypt==4.1.1
-cryptography==41.0.8
-aiohttp==3.9.1
