@@ -40,7 +40,7 @@ kombu==5.3.4
 # === MONITORING & SECURITY ===
 prometheus-client==0.19.0
 sentry-sdk[fastapi]==1.39.2        # Error tracking with security
-safety==2.3.5                      # Vulnerability scanning
+safety==3.2.11                     # Updated vulnerability scanning with latest packaging support
 bandit==1.7.5                      # Security linting
 
 # === DEVELOPMENT & TESTING ===

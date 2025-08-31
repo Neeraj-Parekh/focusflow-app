@@ -46,7 +46,7 @@ jobs:
       run: npm run test:coverage
       
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./frontend/coverage/lcov.info
         flags: frontend
@@ -55,7 +55,7 @@ jobs:
       run: npm run build
       
     - name: Archive build artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: frontend-build
         path: frontend/build/
@@ -128,7 +128,7 @@ jobs:
       run: pytest --cov=app --cov-report=xml --cov-report=html
       
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./backend/coverage.xml
         flags: backend
@@ -150,7 +150,7 @@ jobs:
         output: 'trivy-results.sarif'
         
     - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v2
+      uses: github/codeql-action/upload-sarif@v3
       if: always()
       with:
         sarif_file: 'trivy-results.sarif'
@@ -224,7 +224,7 @@ jobs:
       run: npm run test:e2e
       
     - name: Upload E2E test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: playwright-report
@@ -386,6 +386,7 @@ jobs:
     steps:
     - name: Notify Slack on failure
       uses: 8398a7/action-slack@v3
+      if: failure() && secrets.SLACK_WEBHOOK
       with:
         status: failure
         channel: '#deployments'

@@ -6,77 +6,67 @@ import asyncio
 
 from ..core.config import settings
 
+
 class EmailService:
     def __init__(self):
         self.smtp_host = settings.SMTP_HOST
         self.smtp_port = settings.SMTP_PORT
         self.smtp_user = settings.SMTP_USER
         self.smtp_password = settings.SMTP_PASSWORD
-    
+
     async def send_email(
-        self, 
-        to_email: str, 
-        subject: str, 
-        body: str, 
-        html_body: Optional[str] = None
+        self, to_email: str, subject: str, body: str, html_body: Optional[str] = None
     ) -> bool:
         """Send email asynchronously"""
-        
+
         if not self.smtp_host or not self.smtp_user:
             print(f"Email not sent (SMTP not configured): {subject} to {to_email}")
             return False
-        
+
         try:
             # Run in thread pool to avoid blocking
             await asyncio.get_event_loop().run_in_executor(
-                None, 
-                self._send_email_sync, 
-                to_email, 
-                subject, 
-                body, 
-                html_body
+                None, self._send_email_sync, to_email, subject, body, html_body
             )
             return True
         except Exception as e:
             print(f"Failed to send email: {e}")
             return False
-    
+
     def _send_email_sync(
-        self, 
-        to_email: str, 
-        subject: str, 
-        body: str, 
-        html_body: Optional[str] = None
+        self, to_email: str, subject: str, body: str, html_body: Optional[str] = None
     ):
         """Synchronous email sending"""
-        
-        msg = MIMEMultipart('alternative')
-        msg['From'] = self.smtp_user
-        msg['To'] = to_email
-        msg['Subject'] = subject
-        
+
+        msg = MIMEMultipart("alternative")
+        msg["From"] = self.smtp_user
+        msg["To"] = to_email
+        msg["Subject"] = subject
+
         # Add text part
-        text_part = MIMEText(body, 'plain')
+        text_part = MIMEText(body, "plain")
         msg.attach(text_part)
-        
+
         # Add HTML part if provided
         if html_body:
-            html_part = MIMEText(html_body, 'html')
+            html_part = MIMEText(html_body, "html")
             msg.attach(html_part)
-        
+
         # Send email
         with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
             server.starttls()
             server.login(self.smtp_user, self.smtp_password)
             server.send_message(msg)
 
+
 # Global email service instance
 email_service = EmailService()
+
 
 # Convenience functions
 async def send_welcome_email(email: str, full_name: str) -> bool:
     """Send welcome email to new user"""
-    
+
     subject = "Welcome to FocusFlow!"
     body = f"""
     Hi {full_name},
@@ -97,7 +87,7 @@ async def send_welcome_email(email: str, full_name: str) -> bool:
     Happy focusing!
     The FocusFlow Team
     """
-    
+
     html_body = f"""
     <html>
     <body>
@@ -123,15 +113,16 @@ async def send_welcome_email(email: str, full_name: str) -> bool:
     </body>
     </html>
     """
-    
+
     return await email_service.send_email(email, subject, body, html_body)
+
 
 async def send_password_reset_email(email: str, reset_token: str) -> bool:
     """Send password reset email"""
-    
+
     subject = "Reset your FocusFlow password"
     reset_url = f"https://app.focusflow.com/reset-password?token={reset_token}"
-    
+
     body = f"""
     Hi,
     
@@ -147,7 +138,7 @@ async def send_password_reset_email(email: str, reset_token: str) -> bool:
     Best regards,
     The FocusFlow Team
     """
-    
+
     html_body = f"""
     <html>
     <body>
@@ -166,14 +157,15 @@ async def send_password_reset_email(email: str, reset_token: str) -> bool:
     </body>
     </html>
     """
-    
+
     return await email_service.send_email(email, subject, body, html_body)
+
 
 async def send_productivity_report_email(email: str, report_data: dict) -> bool:
     """Send weekly productivity report"""
-    
+
     subject = "Your FocusFlow Weekly Report"
-    
+
     body = f"""
     Hi,
     
@@ -189,5 +181,5 @@ async def send_productivity_report_email(email: str, report_data: dict) -> bool:
     Best regards,
     The FocusFlow Team
     """
-    
+
     return await email_service.send_email(email, subject, body)
