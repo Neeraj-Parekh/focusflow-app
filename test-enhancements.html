@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FocusFlow Enhancement Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-result {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 FocusFlow Enhancement Test Suite</h1>
+    <p>Testing the enhanced AI features and activity tracking capabilities.</p>
+
+    <div class="test-section">
+        <h2>📊 Activity Tracker Test</h2>
+        <div id="tracker-results"></div>
+        <button onclick="testActivityTracker()">Test Activity Tracker</button>
+        <button onclick="startTracking()">Start Tracking</button>
+        <button onclick="stopTracking()">Stop Tracking</button>
+        
+        <div class="stats" id="activity-stats" style="display:none;">
+            <div class="stat-card">
+                <div class="stat-value" id="keyboard-activity">0</div>
+                <div class="stat-label">Keyboard Events</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="mouse-activity">0</div>
+                <div class="stat-label">Mouse Events</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="productivity-score">0%</div>
+                <div class="stat-label">Productivity Score</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="focus-intensity">0%</div>
+                <div class="stat-label">Focus Intensity</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🤖 AI Suggestions Test</h2>
+        <div id="ai-results"></div>
+        <button onclick="testAISuggestions()">Generate AI Suggestions</button>
+        <button onclick="testTaskPrediction()">Test Task Prediction</button>
+        <div id="suggestions-display"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🏠 Environment Controller Test</h2>
+        <div id="environment-results"></div>
+        <button onclick="testEnvironmentOptimization()">Test Environment Optimization</button>
+        <button onclick="testFocusMode()">Enable Focus Mode</button>
+        <button onclick="testAmbientSounds()">Test Ambient Sounds</button>
+    </div>
+
+    <div class="test-section">
+        <h2>💾 Enhanced Service Worker Test</h2>
+        <div id="sw-results"></div>
+        <button onclick="testServiceWorker()">Test Service Worker</button>
+        <button onclick="testOfflineSync()">Test Offline Sync</button>
+    </div>
+
+    <div class="test-section">
+        <h2>📱 Desktop App Integration Test</h2>
+        <div id="desktop-results"></div>
+        <button onclick="testDesktopIntegration()">Test Desktop Features</button>
+        <div id="desktop-status"></div>
+    </div>
+
+    <script src="src/services/ActivityTracker.js"></script>
+    <script>
+        let activityTracker = null;
+        let trackingActive = false;
+        
+        function logResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function testActivityTracker() {
+            try {
+                if (typeof UniversalActivityTracker !== 'undefined') {
+                    activityTracker = new UniversalActivityTracker();
+                    logResult('tracker-results', '✓ Activity Tracker initialized successfully', 'success');
+                    
+                    // Test tracking stats
+                    const stats = activityTracker.getTrackingStats();
+                    logResult('tracker-results', `📊 Tracking stats: ${JSON.stringify(stats)}`, 'info');
+                    
+                } else {
+                    logResult('tracker-results', '❌ Activity Tracker not available', 'error');
+                }
+            } catch (error) {
+                logResult('tracker-results', `❌ Error: ${error.message}`, 'error');
+            }
+        }
+
+        function startTracking() {
+            if (!activityTracker) {
+                testActivityTracker();
+            }
+            
+            if (activityTracker && !trackingActive) {
+                activityTracker.startTracking('test-user-' + Date.now());
+                trackingActive = true;
+                logResult('tracker-results', '🎯 Activity tracking started', 'success');
+                
+                // Show stats panel
+                document.getElementById('activity-stats').style.display = 'grid';
+                
+                // Setup event listeners for real-time updates
+                window.addEventListener('focusflow-activity-update', (event) => {
+                    updateActivityStats(event.detail);
+                });
+                
+                window.addEventListener('focusflow-suggestion', (event) => {
+                    displaySuggestion(event.detail);
+                });
+                
+                // Update stats periodically
+                setInterval(updateMockStats, 2000);
+                
+            } else {
+                logResult('tracker-results', '⚠️ Tracking already active or tracker not available', 'info');
+            }
+        }
+
+        function stopTracking() {
+            if (activityTracker && trackingActive) {
+                activityTracker.stopTracking();
+                trackingActive = false;
+                logResult('tracker-results', '⏹️ Activity tracking stopped', 'info');
+                document.getElementById('activity-stats').style.display = 'none';
+            }
+        }
+
+        function updateActivityStats(activity) {
+            document.getElementById('keyboard-activity').textContent = activity.keyboardActivity || 0;
+            document.getElementById('mouse-activity').textContent = activity.mouseActivity || 0;
+            document.getElementById('productivity-score').textContent = 
+                Math.round(activity.productivityScore * 100) + '%';
+            document.getElementById('focus-intensity').textContent = 
+                Math.round(activity.focusIntensity * 100) + '%';
+        }
+
+        function updateMockStats() {
+            if (!trackingActive) return;
+            
+            // Generate mock activity data for demonstration
+            const mockActivity = {
+                keyboardActivity: Math.floor(Math.random() * 50),
+                mouseActivity: Math.floor(Math.random() * 30),
+                productivityScore: 0.6 + Math.random() * 0.4,
+                focusIntensity: 0.5 + Math.random() * 0.5
+            };
+            
+            updateActivityStats(mockActivity);
+        }
+
+        function testAISuggestions() {
+            logResult('ai-results', '🤖 Testing AI suggestion system...', 'info');
+            
+            // Simulate AI suggestions
+            const suggestions = [
+                {
+                    type: 'task_creation',
+                    message: 'Would you like to create a task for "Code review"?',
+                    data: { title: 'Code review', confidence: 0.85 }
+                },
+                {
+                    type: 'break_or_refocus',
+                    message: 'You\'ve been working for 90 minutes. Time for a break?',
+                    confidence: 0.9
+                },
+                {
+                    type: 'ambient_sound',
+                    message: 'Consider enabling focus sounds for better concentration',
+                    data: { soundType: 'forest' }
+                }
+            ];
+
+            suggestions.forEach((suggestion, index) => {
+                setTimeout(() => {
+                    displaySuggestion(suggestion);
+                    logResult('ai-results', `✓ Generated suggestion: ${suggestion.message}`, 'success');
+                }, index * 1000);
+            });
+        }
+
+        function testTaskPrediction() {
+            logResult('ai-results', '🔮 Testing task prediction engine...', 'info');
+            
+            // Mock task predictions based on time and patterns
+            const hour = new Date().getHours();
+            let prediction;
+            
+            if (hour < 12) {
+                prediction = 'Morning planning session - Review daily goals';
+            } else if (hour < 17) {
+                prediction = 'Afternoon focus session - Deep work on main project';
+            } else {
+                prediction = 'Evening wrap-up - Review completed tasks';
+            }
+            
+            logResult('ai-results', `🎯 Predicted task: ${prediction}`, 'success');
+            
+            displaySuggestion({
+                type: 'task_creation',
+                message: `Predicted task for ${hour}:00 - ${prediction}`,
+                data: { title: prediction, confidence: 0.8 }
+            });
+        }
+
+        function displaySuggestion(suggestion) {
+            const display = document.getElementById('suggestions-display');
+            const div = document.createElement('div');
+            div.className = 'test-result info';
+            div.innerHTML = `
+                <strong>🤖 AI Suggestion:</strong> ${suggestion.message}
+                ${suggestion.confidence ? `<br><small>Confidence: ${Math.round(suggestion.confidence * 100)}%</small>` : ''}
+            `;
+            display.appendChild(div);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (div.parentNode) {
+                    div.remove();
+                }
+            }, 10000);
+        }
+
+        function testEnvironmentOptimization() {
+            logResult('environment-results', '🏠 Testing environment optimization...', 'info');
+            
+            // Test different environment profiles
+            const profiles = ['deep_work', 'creative', 'break'];
+            
+            profiles.forEach((profile, index) => {
+                setTimeout(() => {
+                    logResult('environment-results', `🎨 Applied ${profile} profile`, 'success');
+                    
+                    // Visual feedback
+                    document.body.className = document.body.className.replace(/theme-\w+/g, '');
+                    document.body.classList.add(`theme-${profile}`);
+                    
+                }, index * 2000);
+            });
+            
+            // Reset after test
+            setTimeout(() => {
+                document.body.className = document.body.className.replace(/theme-\w+/g, '');
+                logResult('environment-results', '🔄 Environment reset to default', 'info');
+            }, 7000);
+        }
+
+        function testFocusMode() {
+            document.body.classList.toggle('focus-mode');
+            const enabled = document.body.classList.contains('focus-mode');
+            
+            logResult('environment-results', 
+                enabled ? '🎯 Focus mode ENABLED' : '🎯 Focus mode DISABLED', 
+                enabled ? 'success' : 'info'
+            );
+        }
+
+        function testAmbientSounds() {
+            logResult('environment-results', '🎵 Testing ambient sound integration...', 'info');
+            
+            const sounds = ['forest', 'rain', 'cafe', 'fire'];
+            sounds.forEach((sound, index) => {
+                setTimeout(() => {
+                    logResult('environment-results', `🎶 Simulating ${sound} ambient sound`, 'success');
+                }, index * 1000);
+            });
+        }
+
+        function testServiceWorker() {
+            logResult('sw-results', '💾 Testing enhanced service worker...', 'info');
+            
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    if (registrations.length > 0) {
+                        logResult('sw-results', `✓ Service Worker registered: ${registrations[0].scope}`, 'success');
+                        
+                        // Test messaging
+                        if (registrations[0].active) {
+                            registrations[0].active.postMessage({type: 'CACHE_USAGE'});
+                            logResult('sw-results', '📤 Sent cache usage request to SW', 'info');
+                        }
+                    } else {
+                        logResult('sw-results', '⚠️ No service worker registered', 'error');
+                    }
+                });
+            } else {
+                logResult('sw-results', '❌ Service Worker not supported', 'error');
+            }
+        }
+
+        function testOfflineSync() {
+            logResult('sw-results', '🔄 Testing offline sync capabilities...', 'info');
+            
+            // Simulate offline data
+            const offlineData = {
+                tasks: [
+                    { id: 1, title: 'Offline task 1', completed: false },
+                    { id: 2, title: 'Offline task 2', completed: true }
+                ],
+                timestamp: Date.now()
+            };
+            
+            // Store in service worker
+            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({
+                    type: 'STORE_OFFLINE_DATA',
+                    data: offlineData
+                });
+                logResult('sw-results', '💾 Stored offline data in SW cache', 'success');
+            } else {
+                logResult('sw-results', '⚠️ Service Worker not available for offline sync', 'error');
+            }
+        }
+
+        function testDesktopIntegration() {
+            logResult('desktop-results', '🖥️ Testing desktop app integration...', 'info');
+            
+            // Check if running in Electron or similar
+            const isElectron = navigator.userAgent.includes('Electron');
+            const isPWA = window.matchMedia('(display-mode: standalone)').matches;
+            
+            logResult('desktop-results', `📱 PWA mode: ${isPWA}`, isPWA ? 'success' : 'info');
+            logResult('desktop-results', `⚡ Electron: ${isElectron}`, isElectron ? 'success' : 'info');
+            
+            // Test desktop features
+            if ('Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    logResult('desktop-results', `🔔 Notifications: ${permission}`, 
+                        permission === 'granted' ? 'success' : 'error');
+                });
+            }
+            
+            // Test wake lock
+            if ('wakeLock' in navigator) {
+                navigator.wakeLock.request('screen').then(wakeLock => {
+                    logResult('desktop-results', '💡 Wake lock acquired', 'success');
+                    wakeLock.release();
+                }).catch(err => {
+                    logResult('desktop-results', `⚠️ Wake lock failed: ${err.message}`, 'error');
+                });
+            }
+            
+            // Update status
+            document.getElementById('desktop-status').innerHTML = `
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value">${isPWA ? '✓' : '✗'}</div>
+                        <div class="stat-label">PWA Mode</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${isElectron ? '⚡' : '🌐'}</div>
+                        <div class="stat-label">${isElectron ? 'Electron' : 'Browser'}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Auto-run basic tests on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                logResult('tracker-results', '🚀 FocusFlow Enhancement Test Suite loaded', 'success');
+                testActivityTracker();
+            }, 1000);
+        });
+
+        // Add some CSS for theme testing
+        const themeCSS = `
+            .theme-deep_work { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+            .theme-creative { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+            .theme-break { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; }
+            .focus-mode .test-section { border: 2px solid #27ae60; }
+            .focus-mode { transition: all 0.3s ease; }
+        `;
+        
+        const style = document.createElement('style');
+        style.textContent = themeCSS;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

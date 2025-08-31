@@ -11,6 +11,11 @@ class FocusFlowApp {
         this.requestNotificationPermission();
         this.setupMobileAudio();
         this.initializeDateRanges();
+        
+        // Enhanced features
+        this.initializeActivityTracking();
+        this.initializePredictiveEngine();
+        this.initializeEnvironmentController();
     }
 
     initializeElements() {
@@ -931,7 +936,797 @@ class FocusFlowApp {
         this.renderTimeEntries();
         this.updateAnalytics();
     }
+
+    // ====== ENHANCED AI FEATURES ======
+    
+    initializeActivityTracking() {
+        // Import activity tracker if available
+        if (typeof UniversalActivityTracker !== 'undefined') {
+            this.activityTracker = new UniversalActivityTracker();
+            this.setupActivityListeners();
+            
+            // Start tracking for current user
+            const userId = this.getUserId();
+            this.activityTracker.startTracking(userId);
+            
+            console.log('✓ Activity tracking initialized');
+        } else {
+            console.warn('Activity tracker not available');
+            this.initializeBasicTracking();
+        }
+    }
+
+    initializeBasicTracking() {
+        // Fallback basic tracking without external dependencies
+        this.basicTracker = {
+            keyboardActivity: 0,
+            mouseActivity: 0,
+            lastActivity: Date.now(),
+            
+            trackActivity: () => {
+                this.basicTracker.lastActivity = Date.now();
+            }
+        };
+
+        // Track basic user activity
+        document.addEventListener('keydown', () => {
+            this.basicTracker.keyboardActivity++;
+            this.basicTracker.trackActivity();
+        });
+
+        document.addEventListener('mousemove', () => {
+            this.basicTracker.mouseActivity++;
+            this.basicTracker.trackActivity();
+        });
+
+        // Check for inactivity every minute
+        setInterval(() => {
+            const timeSinceActivity = Date.now() - this.basicTracker.lastActivity;
+            if (timeSinceActivity > 5 * 60 * 1000) { // 5 minutes
+                this.suggestBreak('You\'ve been inactive for a while. Consider taking a break!');
+            }
+        }, 60000);
+    }
+
+    setupActivityListeners() {
+        // Listen for activity tracking events
+        window.addEventListener('focusflow-activity-update', (event) => {
+            this.handleActivityUpdate(event.detail);
+        });
+
+        window.addEventListener('focusflow-suggestion', (event) => {
+            this.handleAISuggestion(event.detail);
+        });
+
+        window.addEventListener('focusflow-command', (event) => {
+            this.handleAICommand(event.detail);
+        });
+
+        window.addEventListener('focusflow-process-predictions', (event) => {
+            this.processPredictions(event.detail);
+        });
+    }
+
+    handleActivityUpdate(activity) {
+        // Update UI based on activity classification
+        this.updateProductivityIndicator(activity);
+        
+        // Store activity data for analytics
+        this.storeActivityData(activity);
+        
+        // Trigger real-time optimizations
+        if (activity.category === 'DEEP_WORK' && activity.productivityScore > 0.8) {
+            this.enableFocusMode();
+        }
+    }
+
+    updateProductivityIndicator(activity) {
+        // Create or update productivity indicator in UI
+        let indicator = document.getElementById('productivity-indicator');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.id = 'productivity-indicator';
+            indicator.className = 'productivity-indicator';
+            document.querySelector('.app-header').appendChild(indicator);
+        }
+
+        const score = Math.round(activity.productivityScore * 100);
+        const category = activity.category;
+        
+        indicator.innerHTML = `
+            <div class="productivity-score ${category.toLowerCase()}">
+                <span class="score">${score}%</span>
+                <span class="category">${category.replace('_', ' ')}</span>
+            </div>
+        `;
+
+        // Add CSS classes for styling
+        indicator.className = `productivity-indicator ${category.toLowerCase()}`;
+    }
+
+    enableFocusMode() {
+        // Enable focus mode automatically
+        if (!this.focusModeEnabled) {
+            this.focusModeEnabled = true;
+            document.body.classList.add('focus-mode');
+            
+            // Show focus mode notification
+            this.showNotification('Focus Mode Enabled', 'Deep work detected - distractions minimized');
+            
+            // Auto-enable ambient sounds if not already playing
+            if (!this.isAmbientSoundPlaying()) {
+                this.playAmbientSound('forest');
+            }
+        }
+    }
+
+    handleAISuggestion(suggestion) {
+        // Display AI suggestions to user
+        this.showAISuggestion(suggestion);
+    }
+
+    showAISuggestion(suggestion) {
+        // Create suggestion notification
+        const suggestionDiv = document.createElement('div');
+        suggestionDiv.className = 'ai-suggestion';
+        suggestionDiv.innerHTML = `
+            <div class="suggestion-content">
+                <div class="suggestion-icon">🤖</div>
+                <div class="suggestion-text">
+                    <strong>AI Suggestion:</strong>
+                    <p>${suggestion.message}</p>
+                </div>
+                <div class="suggestion-actions">
+                    <button onclick="app.acceptSuggestion('${suggestion.type}', ${JSON.stringify(suggestion.data).replace(/"/g, '&quot;')})">Accept</button>
+                    <button onclick="app.dismissSuggestion(this)">Dismiss</button>
+                </div>
+            </div>
+        `;
+
+        // Add to suggestions container
+        let container = document.getElementById('ai-suggestions');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'ai-suggestions';
+            container.className = 'ai-suggestions-container';
+            document.body.appendChild(container);
+        }
+
+        container.appendChild(suggestionDiv);
+
+        // Auto-dismiss after 30 seconds
+        setTimeout(() => {
+            if (suggestionDiv.parentNode) {
+                suggestionDiv.remove();
+            }
+        }, 30000);
+    }
+
+    acceptSuggestion(type, data) {
+        switch (type) {
+            case 'task_creation':
+                this.createTaskFromSuggestion(data);
+                break;
+            case 'break_or_refocus':
+                this.startBreak();
+                break;
+            case 'ambient_sound':
+                this.playAmbientSound(data.soundType);
+                break;
+            case 'website_blocking':
+                this.enableDistractingWebsiteBlocking(data.duration);
+                break;
+        }
+    }
+
+    dismissSuggestion(button) {
+        const suggestion = button.closest('.ai-suggestion');
+        if (suggestion) {
+            suggestion.remove();
+        }
+    }
+
+    createTaskFromSuggestion(data) {
+        // Create task from AI suggestion
+        const task = {
+            id: Date.now(),
+            title: data.title,
+            description: `Auto-created from activity: ${data.context}`,
+            project: this.currentProject.value || 'Work',
+            priority: 'medium',
+            estimatedPomodoros: Math.ceil(data.estimatedDuration / 25),
+            completed: false,
+            createdAt: new Date(),
+            tags: ['ai-generated']
+        };
+
+        this.tasks.push(task);
+        this.saveData();
+        this.renderTasks();
+        
+        this.showNotification('Task Created', `Created task: ${task.title}`);
+    }
+
+    initializePredictiveEngine() {
+        this.predictiveEngine = {
+            patterns: new Map(),
+            predictions: [],
+            
+            generatePredictions: () => {
+                return this.generateTaskPredictions();
+            },
+            
+            analyzePatterns: () => {
+                return this.analyzeUserPatterns();
+            }
+        };
+
+        // Generate predictions every 5 minutes
+        setInterval(() => {
+            this.generateAndDisplayPredictions();
+        }, 5 * 60 * 1000);
+
+        console.log('✓ Predictive engine initialized');
+    }
+
+    generateTaskPredictions() {
+        const now = new Date();
+        const hour = now.getHours();
+        const dayOfWeek = now.getDay();
+        
+        const predictions = [];
+
+        // Time-based predictions
+        if (hour === 9 && !this.hasTasksForToday()) {
+            predictions.push({
+                title: 'Plan your day',
+                description: 'Start by creating your daily task list',
+                priority: 'high',
+                confidence: 0.9,
+                reasoning: 'Morning planning session detected'
+            });
+        }
+
+        if (hour >= 14 && hour <= 16 && this.getCompletedTodayCount() === 0) {
+            predictions.push({
+                title: 'Afternoon focus session',
+                description: 'Tackle your most important task of the day',
+                priority: 'high',
+                confidence: 0.8,
+                reasoning: 'Afternoon productivity peak'
+            });
+        }
+
+        // Pattern-based predictions
+        const recentTasks = this.getRecentTasks(7); // Last 7 days
+        const commonTasks = this.findCommonTasks(recentTasks);
+        
+        for (const commonTask of commonTasks) {
+            predictions.push({
+                title: commonTask.title,
+                description: `Recurring task based on your patterns`,
+                priority: commonTask.priority,
+                confidence: commonTask.frequency,
+                reasoning: `You typically do this on ${this.getDayName(dayOfWeek)}`
+            });
+        }
+
+        return predictions.slice(0, 5); // Top 5 predictions
+    }
+
+    generateAndDisplayPredictions() {
+        const predictions = this.generateTaskPredictions();
+        
+        if (predictions.length > 0) {
+            this.displayPredictions(predictions);
+        }
+    }
+
+    displayPredictions(predictions) {
+        // Show high-confidence predictions as suggestions
+        const highConfidencePredictions = predictions.filter(p => p.confidence > 0.7);
+        
+        for (const prediction of highConfidencePredictions) {
+            this.showAISuggestion({
+                type: 'task_creation',
+                message: `Would you like to add: "${prediction.title}"?`,
+                data: prediction,
+                confidence: prediction.confidence
+            });
+        }
+    }
+
+    initializeEnvironmentController() {
+        this.environmentController = {
+            currentProfile: null,
+            profiles: {
+                'deep_work': {
+                    name: 'Deep Work Focus',
+                    ambientSound: 'forest',
+                    notifications: 'dnd',
+                    theme: 'focus'
+                },
+                'creative': {
+                    name: 'Creative Mode',
+                    ambientSound: 'cafe',
+                    notifications: 'minimal',
+                    theme: 'creative'
+                },
+                'break': {
+                    name: 'Break Time',
+                    ambientSound: 'rain',
+                    notifications: 'normal',
+                    theme: 'relaxed'
+                }
+            }
+        };
+
+        console.log('✓ Environment controller initialized');
+    }
+
+    optimizeEnvironmentForTask(taskType) {
+        const profile = this.selectOptimalProfile(taskType);
+        this.applyEnvironmentProfile(profile);
+    }
+
+    selectOptimalProfile(taskType) {
+        const profileMap = {
+            'focus': 'deep_work',
+            'creative': 'creative',
+            'break': 'break',
+            'meeting': 'minimal'
+        };
+
+        return this.environmentController.profiles[profileMap[taskType] || 'deep_work'];
+    }
+
+    applyEnvironmentProfile(profile) {
+        if (!profile) return;
+
+        // Apply ambient sound
+        if (profile.ambientSound) {
+            this.playAmbientSound(profile.ambientSound);
+        }
+
+        // Apply notification settings
+        if (profile.notifications === 'dnd') {
+            this.enableDoNotDisturb();
+        }
+
+        // Apply theme
+        if (profile.theme) {
+            this.applyTheme(profile.theme);
+        }
+
+        this.environmentController.currentProfile = profile;
+        this.showNotification('Environment Optimized', `Applied ${profile.name} profile`);
+    }
+
+    enableDoNotDisturb() {
+        document.body.classList.add('dnd-mode');
+        this.dndEnabled = true;
+        
+        // Minimize non-essential notifications
+        this.notificationSettings = {
+            social: false,
+            nonWork: false,
+            critical: true
+        };
+    }
+
+    applyTheme(themeName) {
+        document.body.className = document.body.className.replace(/theme-\w+/g, '');
+        document.body.classList.add(`theme-${themeName}`);
+    }
+
+    // Helper methods
+    getUserId() {
+        let userId = localStorage.getItem('focusflow-user-id');
+        if (!userId) {
+            userId = 'user-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('focusflow-user-id', userId);
+        }
+        return userId;
+    }
+
+    storeActivityData(activity) {
+        const activityLog = JSON.parse(localStorage.getItem('focusflow-activity-log') || '[]');
+        activityLog.push({
+            ...activity,
+            timestamp: Date.now()
+        });
+
+        // Keep only last 1000 entries
+        if (activityLog.length > 1000) {
+            activityLog.splice(0, activityLog.length - 1000);
+        }
+
+        localStorage.setItem('focusflow-activity-log', JSON.stringify(activityLog));
+    }
+
+    hasTasksForToday() {
+        const today = new Date().toDateString();
+        return this.tasks.some(task => 
+            !task.completed && 
+            (!task.dueDate || new Date(task.dueDate).toDateString() === today)
+        );
+    }
+
+    getCompletedTodayCount() {
+        const today = new Date().toDateString();
+        return this.tasks.filter(task => 
+            task.completed && 
+            task.completedAt && 
+            new Date(task.completedAt).toDateString() === today
+        ).length;
+    }
+
+    getRecentTasks(days) {
+        const cutoff = Date.now() - (days * 24 * 60 * 60 * 1000);
+        return this.tasks.filter(task => 
+            task.createdAt && new Date(task.createdAt).getTime() > cutoff
+        );
+    }
+
+    findCommonTasks(tasks) {
+        const taskGroups = {};
+        
+        tasks.forEach(task => {
+            const key = task.title.toLowerCase().trim();
+            if (!taskGroups[key]) {
+                taskGroups[key] = {
+                    title: task.title,
+                    priority: task.priority,
+                    count: 0
+                };
+            }
+            taskGroups[key].count++;
+        });
+
+        return Object.values(taskGroups)
+            .filter(group => group.count > 1)
+            .map(group => ({
+                ...group,
+                frequency: group.count / tasks.length
+            }))
+            .sort((a, b) => b.frequency - a.frequency);
+    }
+
+    getDayName(dayOfWeek) {
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        return days[dayOfWeek];
+    }
+
+    isAmbientSoundPlaying() {
+        return this.currentAmbientSound && !this.currentAmbientSound.paused;
+    }
+
+    playAmbientSound(soundType) {
+        // Stop current sound if playing
+        if (this.currentAmbientSound) {
+            this.currentAmbientSound.pause();
+        }
+
+        // Play new sound
+        const soundMap = {
+            'forest': './sounds/forest.mp3',
+            'rain': './sounds/rain.mp3',
+            'cafe': './sounds/cafe.mp3',
+            'fire': './sounds/fire.mp3',
+            'whitenoise': './sounds/whitenoise.mp3'
+        };
+
+        if (soundMap[soundType]) {
+            this.currentAmbientSound = new Audio(soundMap[soundType]);
+            this.currentAmbientSound.loop = true;
+            this.currentAmbientSound.volume = 0.3;
+            this.currentAmbientSound.play().catch(e => {
+                console.warn('Could not play ambient sound:', e);
+            });
+        }
+    }
+
+    suggestBreak(message) {
+        this.showAISuggestion({
+            type: 'break_or_refocus',
+            message: message || 'Time for a break?',
+            confidence: 0.8
+        });
+    }
+
+    enableDistractingWebsiteBlocking(duration) {
+        // Placeholder for website blocking functionality
+        // In a real implementation, this would integrate with browser extensions
+        this.showNotification('Focus Mode', `Distraction blocking enabled for ${Math.round(duration / 60000)} minutes`);
+        
+        // Store the blocking state
+        localStorage.setItem('focusflow-blocking-until', Date.now() + duration);
+    }
+
+    handleAICommand(command) {
+        switch (command.command) {
+            case 'enable_dnd':
+                this.enableDoNotDisturb();
+                break;
+            case 'app_focused':
+                this.onAppFocused();
+                break;
+            case 'app_blurred':
+                this.onAppBlurred();
+                break;
+            case 'app_hidden':
+                this.onAppHidden();
+                break;
+            case 'app_visible':
+                this.onAppVisible();
+                break;
+        }
+    }
+
+    onAppFocused() {
+        // App gained focus - user is actively using it
+        this.appFocusTime = Date.now();
+    }
+
+    onAppBlurred() {
+        // App lost focus - user switched to something else
+        if (this.appFocusTime) {
+            const focusedDuration = Date.now() - this.appFocusTime;
+            this.recordFocusSession(focusedDuration);
+        }
+    }
+
+    onAppHidden() {
+        // App is hidden/minimized
+        this.isAppVisible = false;
+    }
+
+    onAppVisible() {
+        // App is visible again
+        this.isAppVisible = true;
+    }
+
+    recordFocusSession(duration) {
+        // Record how long user stayed focused on the app
+        const sessions = JSON.parse(localStorage.getItem('focusflow-focus-sessions') || '[]');
+        sessions.push({
+            duration: duration,
+            timestamp: Date.now()
+        });
+
+        // Keep only last 100 sessions
+        if (sessions.length > 100) {
+            sessions.splice(0, sessions.length - 100);
+        }
+
+        localStorage.setItem('focusflow-focus-sessions', JSON.stringify(sessions));
+    }
+
+    processPredictions(data) {
+        // Process activity data to generate predictions
+        const { userId, activities } = data;
+        
+        // Analyze patterns in activities
+        const patterns = this.analyzeActivityPatterns(activities);
+        
+        // Generate predictions based on patterns
+        const predictions = this.generatePredictionsFromPatterns(patterns);
+        
+        // Display relevant predictions
+        if (predictions.length > 0) {
+            this.displayPredictions(predictions);
+        }
+    }
+
+    analyzeActivityPatterns(activities) {
+        const patterns = {
+            productiveHours: new Map(),
+            commonTasks: new Map(),
+            breakPatterns: []
+        };
+
+        activities.forEach(activity => {
+            const hour = new Date(activity.timestamp).getHours();
+            
+            // Track productive hours
+            if (activity.category === 'DEEP_WORK' || activity.category === 'PRODUCTIVE') {
+                const current = patterns.productiveHours.get(hour) || 0;
+                patterns.productiveHours.set(hour, current + 1);
+            }
+
+            // Track break patterns
+            if (activity.category === 'DISTRACTING') {
+                patterns.breakPatterns.push({
+                    hour: hour,
+                    timestamp: activity.timestamp
+                });
+            }
+        });
+
+        return patterns;
+    }
+
+    generatePredictionsFromPatterns(patterns) {
+        const predictions = [];
+        const currentHour = new Date().getHours();
+
+        // Predict based on productive hours
+        if (patterns.productiveHours.has(currentHour)) {
+            const productivity = patterns.productiveHours.get(currentHour);
+            if (productivity > 2) { // If typically productive at this hour
+                predictions.push({
+                    title: 'Focus session',
+                    description: 'This is typically a productive time for you',
+                    priority: 'high',
+                    confidence: Math.min(productivity / 5, 1),
+                    reasoning: `You're usually productive at ${currentHour}:00`
+                });
+            }
+        }
+
+        return predictions;
+    }
 }
+
+// Enhanced CSS for new features
+const enhancedCSS = `
+    .productivity-indicator {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+    .productivity-indicator.deep_work {
+        background: linear-gradient(135deg, #27ae60, #2ecc71);
+        color: white;
+    }
+
+    .productivity-indicator.productive {
+        background: linear-gradient(135deg, #3498db, #5dade2);
+        color: white;
+    }
+
+    .productivity-indicator.neutral {
+        background: linear-gradient(135deg, #95a5a6, #bdc3c7);
+        color: white;
+    }
+
+    .productivity-indicator.distracting {
+        background: linear-gradient(135deg, #e74c3c, #ec7063);
+        color: white;
+    }
+
+    .ai-suggestions-container {
+        position: fixed;
+        top: 80px;
+        right: 20px;
+        z-index: 1000;
+        max-width: 350px;
+    }
+
+    .ai-suggestion {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        animation: slideIn 0.3s ease-out;
+    }
+
+    .suggestion-content {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    .suggestion-icon {
+        font-size: 20px;
+        flex-shrink: 0;
+    }
+
+    .suggestion-text {
+        flex: 1;
+    }
+
+    .suggestion-text strong {
+        color: #2c3e50;
+        font-size: 14px;
+    }
+
+    .suggestion-text p {
+        margin: 5px 0 10px 0;
+        color: #666;
+        font-size: 13px;
+        line-height: 1.4;
+    }
+
+    .suggestion-actions {
+        display: flex;
+        gap: 5px;
+        margin-top: 10px;
+    }
+
+    .suggestion-actions button {
+        padding: 5px 10px;
+        border: none;
+        border-radius: 4px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .suggestion-actions button:first-child {
+        background: #3498db;
+        color: white;
+    }
+
+    .suggestion-actions button:first-child:hover {
+        background: #2980b9;
+    }
+
+    .suggestion-actions button:last-child {
+        background: #ecf0f1;
+        color: #666;
+    }
+
+    .suggestion-actions button:last-child:hover {
+        background: #d5dbdb;
+    }
+
+    .focus-mode {
+        --primary-color: #2c3e50;
+        --accent-color: #27ae60;
+    }
+
+    .focus-mode .container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .focus-mode .tab-navigation button:not(.active) {
+        opacity: 0.5;
+    }
+
+    .dnd-mode .notification {
+        display: none !important;
+    }
+
+    .theme-focus {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .theme-creative {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .theme-relaxed {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    @keyframes slideIn {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`;
+
+// Inject enhanced CSS
+const styleSheet = document.createElement('style');
+styleSheet.textContent = enhancedCSS;
+document.head.appendChild(styleSheet);
 
 // Initialize the app when DOM is loaded
 let app;

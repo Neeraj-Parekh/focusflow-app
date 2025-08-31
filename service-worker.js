@@ -1,11 +1,17 @@
-const staticCacheName = 'focusflow-static-v20241130';
-const dynamicCacheName = 'focusflow-dynamic-v20241130';
-const assets = [
+// Enhanced Service Worker with Memory-Efficient Caching and Background Sync
+const CACHE_VERSION = 'focusflow-v2.1';
+const STATIC_CACHE = `${CACHE_VERSION}-static`;
+const DYNAMIC_CACHE = `${CACHE_VERSION}-dynamic`;
+const OFFLINE_CACHE = `${CACHE_VERSION}-offline`;
+
+// Comprehensive caching strategy
+const STATIC_ASSETS = [
   './',
   './index.html',
   './app.js',
   './style.css',
   './manifest.json',
+  './src/services/ActivityTracker.js', // Will be compiled from TS
   './images/icon-72x72.png',
   './images/icon-96x96.png',
   './images/icon-128x128.png',
@@ -22,30 +28,60 @@ const assets = [
   './sounds/whitenoise.mp3'
 ];
 
-// Install event - cache the app shell resources
+// Memory management for offline data
+const MAX_OFFLINE_ENTRIES = 100;
+const CACHE_SIZE_LIMIT = 50 * 1024 * 1024; // 50MB
+
+// Install event with proper cache management
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(staticCacheName).then(cache => {
-      console.log('Caching app shell assets');
-      return cache.addAll(assets);
-    })
+    Promise.all([
+      // Cache static assets
+      caches.open(STATIC_CACHE)
+        .then(cache => {
+          console.log('Caching app shell assets');
+          return cache.addAll(STATIC_ASSETS);
+        }),
+      
+      // Initialize offline storage
+      caches.open(OFFLINE_CACHE)
+        .then(cache => {
+          console.log('Initialized offline cache');
+          return cache;
+        }),
+      
+      // Skip waiting to activate immediately
+      self.skipWaiting()
+    ])
   );
 });
 
-// Activate event - clean up old caches
+// Activate event with comprehensive cache cleanup
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys
-          .filter(key => key !== staticCacheName && key !== dynamicCacheName)
-          .map(key => caches.delete(key))
-      );
-    })
+    Promise.all([
+      // Clean up old caches
+      caches.keys().then(keys => {
+        return Promise.all(
+          keys
+            .filter(key => !key.startsWith(CACHE_VERSION))
+            .map(key => {
+              console.log('Deleting old cache:', key);
+              return caches.delete(key);
+            })
+        );
+      }),
+      
+      // Claim all clients
+      self.clients.claim(),
+      
+      // Initialize background sync
+      self.registration.sync.register('background-sync')
+    ])
   );
 });
 
-// Fetch event - serve from cache or fetch from network
+// Enhanced fetch strategy with fallbacks
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(cacheRes => {
